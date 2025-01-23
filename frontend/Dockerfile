@@ -10,5 +10,6 @@ WORKDIR /app
 COPY --from=builder /app/build ./build
 COPY server.js .
 RUN npm install express
+ENV NODE_ENV=production
 EXPOSE 3000
 CMD ["node", "server.js"] 
