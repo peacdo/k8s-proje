@@ -6,7 +6,7 @@ const app = express();
 
 // Update CORS configuration
 app.use(cors({
-  origin: ['http://192.168.22.242', 'http://192.168.22.241', 'http://localhost:3000'],
+  origin: ['http://esb.staj', 'https://esb.staj'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Accept'],
   credentials: true

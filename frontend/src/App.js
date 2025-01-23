@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// Get the ingress controller's address
-const API_BASE = '/api';  // Use relative path since we're using ingress
+// Use the domain name
+const API_BASE = 'http://esb.staj/api';  // For development
 
 function App() {
   const [books, setBooks] = useState([]);
