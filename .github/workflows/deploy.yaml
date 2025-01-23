@@ -34,20 +34,46 @@ jobs:
     
     - name: Create Database Secret
       run: |
-        kubectl delete secret db-credentials --ignore-not-found
-        kubectl create secret generic db-credentials --from-literal=password=${{ secrets.DB_PASSWORD }}
+        kubectl create namespace proje --dry-run=client -o yaml | kubectl apply -f -
+        kubectl delete secret db-credentials --ignore-not-found -n proje
+        kubectl create secret generic db-credentials --from-literal=password=${{ secrets.DB_PASSWORD }} -n proje
     
     - name: Create Image Pull Secret
       run: |
-        kubectl delete secret ghcr-secret --ignore-not-found
+        kubectl delete secret ghcr-secret --ignore-not-found -n proje
         kubectl create secret docker-registry ghcr-secret \
           --docker-server=ghcr.io \
           --docker-username=peacdo \
-          --docker-password=${{ secrets.CR_PAT }}
+          --docker-password=${{ secrets.CR_PAT }} \
+          -n proje
     
     - name: Deploy to Kubernetes
       if: github.ref == 'refs/heads/main'
       run: |
+        # Create namespace if it doesn't exist
+        kubectl create namespace proje --dry-run=client -o yaml | kubectl apply -f -
+        
+        kubectl apply -f k8s/database.yaml
+        kubectl wait --for=condition=ready pod -l app=postgres --timeout=300s -n proje
+        echo "Database pod is ready"
+        
+        kubectl apply -f k8s/backend.yaml
+        echo "Waiting for backend pod..."
+        sleep 10
+        kubectl get pods -l app=backend -o wide -n proje
+        kubectl describe pod -l app=backend -n proje
+        kubectl logs -l app=backend -n proje
+        kubectl wait --for=condition=ready pod -l app=backend --timeout=300s -n proje
+        
+        kubectl apply -f k8s/frontend.yaml
+        kubectl wait --for=condition=ready pod -l app=frontend --timeout=300s -n proje
+    
+    - name: Verify Deployment
+      if: github.ref == 'refs/heads/main'
+      run: |
+        kubectl get pods -n proje
+        kubectl get services -n proje
+
         # Install NGINX Ingress Controller if not present
         if ! kubectl get namespace ingress-nginx &> /dev/null; then
           kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
@@ -77,10 +103,4 @@ jobs:
         kubectl wait --for=condition=ready pod -l app=backend --timeout=300s
         
         kubectl apply -f k8s/frontend.yaml
-        kubectl wait --for=condition=ready pod -l app=frontend --timeout=300s
-    
-    - name: Verify Deployment
-      if: github.ref == 'refs/heads/main'
-      run: |
-        kubectl get pods
-        kubectl get services 
+        kubectl wait --for=condition=ready pod -l app=frontend --timeout=300s 

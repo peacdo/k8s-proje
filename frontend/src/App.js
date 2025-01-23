@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+const API_BASE = '/api';
+
 function App() {
   const [books, setBooks] = useState([]);
   const [newBook, setNewBook] = useState({ title: '', author: '', year: '' });
@@ -12,7 +14,7 @@ function App() {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch('/api/books');
+      const response = await fetch(`${API_BASE}/books`);
       const data = await response.json();
       setBooks(data);
     } catch (error) {
@@ -23,7 +25,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch('/api/books', {
+      await fetch(`${API_BASE}/books`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,10 +40,14 @@ function App() {
   };
 
   const deleteBook = async (id) => {
-    await fetch(`/api/books/${id}`, {
-      method: 'DELETE'
-    });
-    fetchBooks();
+    try {
+      await fetch(`${API_BASE}/books/${id}`, {
+        method: 'DELETE'
+      });
+      fetchBooks();
+    } catch (error) {
+      console.error('Error deleting book:', error);
+    }
   };
 
   const startEdit = (book) => {
