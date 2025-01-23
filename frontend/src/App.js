@@ -15,19 +15,34 @@ function App() {
 
   const fetchBooks = async () => {
     try {
+      console.log('Fetching books...');  // Debug log
       const response = await fetch(`${API_BASE}/books`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         }
       });
+      
+      console.log('Response status:', response.status);  // Debug log
+      console.log('Response headers:', response.headers);  // Debug log
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json();
+      
+      const text = await response.text();  // Get raw response
+      console.log('Raw response:', text);  // Debug log
+      
+      const data = text ? JSON.parse(text) : [];  // Parse if not empty
+      console.log('Parsed data:', data);  // Debug log
+      
       setBooks(data);
     } catch (error) {
-      console.error('Error fetching books:', error);
+      console.error('Detailed error:', {  // Detailed error logging
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
     }
   };
 
