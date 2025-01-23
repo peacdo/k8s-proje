@@ -23,14 +23,14 @@ jobs:
     - name: Build Frontend
       run: |
         cd frontend
-        docker build --platform linux/arm64 -t ghcr.io/YOUR_USERNAME/frontend:latest .
-        docker push ghcr.io/YOUR_USERNAME/frontend:latest
+        docker build --platform linux/arm64 -t ghcr.io/peacdo/frontend:latest .
+        docker push ghcr.io/peacdo/frontend:latest
     
     - name: Build Backend
       run: |
         cd backend
-        docker build --platform linux/arm64 -t ghcr.io/YOUR_USERNAME/backend:latest .
-        docker push ghcr.io/YOUR_USERNAME/backend:latest
+        docker build --platform linux/arm64 -t ghcr.io/peacdo/backend:latest .
+        docker push ghcr.io/peacdo/backend:latest
     
     - name: Create Database Secret
       run: |

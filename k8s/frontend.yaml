@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ghcr.io/YOUR_USERNAME/frontend:latest
+        image: ghcr.io/peacdo/frontend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
