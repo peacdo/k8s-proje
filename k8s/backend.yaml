@@ -15,6 +15,12 @@ spec:
       containers:
       - name: backend
         image: backend:latest
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: password
         ports:
         - containerPort: 8080
 ---

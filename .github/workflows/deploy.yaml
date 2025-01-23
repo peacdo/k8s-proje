@@ -3,6 +3,8 @@ name: Deploy to Kubernetes
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -10,6 +12,11 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Check Docker and kubectl
+      run: |
+        docker --version
+        kubectl version --client
     
     - name: Build Frontend
       run: |
@@ -22,7 +29,19 @@ jobs:
         docker build -t backend:latest .
     
     - name: Deploy to Kubernetes
+      if: github.ref == 'refs/heads/main'  # Only deploy on main branch
       run: |
         kubectl apply -f k8s/database.yaml
+        kubectl wait --for=condition=ready pod -l app=postgres --timeout=300s
+        
         kubectl apply -f k8s/backend.yaml
-        kubectl apply -f k8s/frontend.yaml 
+        kubectl wait --for=condition=ready pod -l app=backend --timeout=300s
+        
+        kubectl apply -f k8s/frontend.yaml
+        kubectl wait --for=condition=ready pod -l app=frontend --timeout=300s
+    
+    - name: Verify Deployment
+      if: github.ref == 'refs/heads/main'
+      run: |
+        kubectl get pods
+        kubectl get services 

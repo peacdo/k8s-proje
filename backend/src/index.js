@@ -10,7 +10,7 @@ const pool = new Pool({
   user: 'postgres',
   host: 'postgres-service',
   database: 'books_db',
-  password: 'mysecretpassword',
+  password: process.env.DB_PASSWORD,
   port: 5432,
 });
 
