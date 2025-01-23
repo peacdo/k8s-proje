@@ -33,8 +33,7 @@ jobs:
     
     - name: Configure Docker
       run: |
-        NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-        echo "{\"insecure-registries\":[\"${NODE_IP}:32000\"]}" | sudo tee /etc/docker/daemon.json
+        echo "{\"insecure-registries\":[\"192.168.22.129:32000\"]}" | sudo tee /etc/docker/daemon.json
         sudo systemctl restart docker
         # Wait for Docker to restart
         sleep 5
@@ -55,12 +54,6 @@ jobs:
       run: |
         kubectl delete secret db-credentials --ignore-not-found
         kubectl create secret generic db-credentials --from-literal=password=${{ secrets.DB_PASSWORD }}
-    
-    - name: Update Kubernetes Manifests
-      run: |
-        NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-        sed -i "s|localhost:5000|${NODE_IP}:32000|g" k8s/frontend.yaml
-        sed -i "s|localhost:5000|${NODE_IP}:32000|g" k8s/backend.yaml
     
     - name: Deploy to Kubernetes
       if: github.ref == 'refs/heads/main'
