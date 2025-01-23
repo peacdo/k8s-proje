@@ -12,6 +12,7 @@ function App() {
     frontend: { pod: '', server: '' },
     backend: { pod: '', server: '' }
   });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     fetchBooks();
@@ -121,9 +122,41 @@ function App() {
     }
   };
 
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_BASE}/books/${editingBook.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newBook),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Reset form and close modal
+      setNewBook({ title: '', author: '', year: '' });
+      setEditingBook(null);
+      setIsEditModalOpen(false);
+      fetchBooks();
+    } catch (error) {
+      console.error('Error updating book:', error);
+    }
+  };
+
   const startEdit = (book) => {
     setEditingBook(book);
     setNewBook(book);
+    setIsEditModalOpen(true);
+  };
+
+  const cancelEdit = () => {
+    setEditingBook(null);
+    setNewBook({ title: '', author: '', year: '' });
+    setIsEditModalOpen(false);
   };
 
   return (
@@ -175,6 +208,38 @@ function App() {
           ))}
         </tbody>
       </table>
+
+      {isEditModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Edit Book</h2>
+            <form onSubmit={handleEdit}>
+              <input
+                type="text"
+                placeholder="Title"
+                value={newBook.title}
+                onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Author"
+                value={newBook.author}
+                onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
+              />
+              <input
+                type="number"
+                placeholder="Year"
+                value={newBook.year}
+                onChange={(e) => setNewBook({ ...newBook, year: e.target.value })}
+              />
+              <div className="modal-buttons">
+                <button type="submit">Save</button>
+                <button type="button" onClick={cancelEdit}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <footer style={{
         position: 'fixed',
