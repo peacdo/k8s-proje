@@ -40,6 +40,14 @@ pool.query(`
   console.error('Error initializing database:', err);
 });
 
+// Add logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
+  if (req.body) console.log('Body:', req.body);
+  next();
+});
+
 // Get all books
 app.get('/books', async (req, res) => {
   try {
@@ -88,6 +96,12 @@ app.delete('/books/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: err.message });
 });
 
 const PORT = 8080;

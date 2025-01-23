@@ -49,6 +49,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Submitting book:', newBook);  // Debug log
       const response = await fetch(`${API_BASE}/books`, {
         method: 'POST',
         headers: {
@@ -56,13 +57,26 @@ function App() {
         },
         body: JSON.stringify(newBook),
       });
+      
+      console.log('Response status:', response.status);  // Debug log
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);  // Debug log
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const result = await response.json();
+      console.log('Success response:', result);  // Debug log
+      
       setNewBook({ title: '', author: '', year: '' });
       fetchBooks();
     } catch (error) {
-      console.error('Error adding book:', error);
+      console.error('Detailed error:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
     }
   };
 
