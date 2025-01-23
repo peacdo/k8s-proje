@@ -4,7 +4,12 @@ metadata:
   name: backend
   namespace: proje
 spec:
-  replicas: 1
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: backend
@@ -19,6 +24,13 @@ spec:
       - name: backend
         image: ghcr.io/peacdo/backend:latest
         imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
         env:
         - name: DB_PASSWORD
           valueFrom:
