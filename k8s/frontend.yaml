@@ -86,7 +86,7 @@ metadata:
   name: frontend-ingress
   namespace: proje
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, DELETE, OPTIONS"
@@ -99,20 +99,13 @@ spec:
   - host: esb.staj
     http:
       paths:
-      - path: /api(/|$)(.*)
+      - path: /api/(.*)
         pathType: ImplementationSpecific
         backend:
           service:
             name: backend-internal
             port:
               number: 8080
-      - path: /static/(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: frontend-service
-            port:
-              number: 80
       - path: /(.*)
         pathType: ImplementationSpecific
         backend:

@@ -15,6 +15,12 @@ app.get('/pod-info', (req, res) => {
   });
 });
 
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 // Handle React routing, return all requests to React app
 app.get('/*', function(req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
@@ -23,4 +29,5 @@ app.get('/*', function(req, res) {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Serving static files from: ${path.join(__dirname, 'build')}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 }); 
