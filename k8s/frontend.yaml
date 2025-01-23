@@ -37,14 +37,14 @@ spec:
           httpGet:
             path: /
             port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
+          initialDelaySeconds: 30
+          periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /
             port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 3
+          initialDelaySeconds: 15
+          periodSeconds: 5
         env:
         - name: REACT_APP_POD_NAME
           valueFrom:
@@ -93,6 +93,7 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       try_files $uri $uri/ /index.html;
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   rules:
   - host: esb.staj
