@@ -25,6 +25,14 @@ spec:
             secretKeyRef:
               name: db-credentials
               key: password
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         ports:
         - containerPort: 8080
         readinessProbe:

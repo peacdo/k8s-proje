@@ -2,6 +2,7 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  padding-bottom: 100px; /* Make room for the footer */
 }
 
 form {
@@ -42,4 +43,24 @@ th, td {
 
 th {
   background-color: #f8f9fa;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  font-size: 0.9em;
+  color: #666;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.footer div {
+  margin: 0 10px;
 } 

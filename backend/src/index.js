@@ -104,6 +104,18 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
+// Add server info endpoint
+app.get('/info', async (req, res) => {
+  const podName = process.env.HOSTNAME || 'unknown';
+  const serverIP = req.socket.localAddress || 'unknown';
+  
+  res.json({
+    pod: podName,
+    server: serverIP,
+    timestamp: new Date().toISOString()
+  });
+});
+
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

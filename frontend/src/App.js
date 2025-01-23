@@ -8,10 +8,22 @@ function App() {
   const [books, setBooks] = useState([]);
   const [newBook, setNewBook] = useState({ title: '', author: '', year: '' });
   const [editingBook, setEditingBook] = useState(null);
+  const [serverInfo, setServerInfo] = useState({ pod: '', server: '' });
 
   useEffect(() => {
     fetchBooks();
+    fetchServerInfo();
   }, []);
+
+  const fetchServerInfo = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/info`);
+      const data = await response.json();
+      setServerInfo(data);
+    } catch (error) {
+      console.error('Error fetching server info:', error);
+    }
+  };
 
   const fetchBooks = async () => {
     try {
@@ -151,6 +163,23 @@ function App() {
           ))}
         </tbody>
       </table>
+
+      <footer style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#f8f9fa',
+        padding: '10px',
+        borderTop: '1px solid #ddd',
+        textAlign: 'center',
+        fontSize: '0.9em',
+        color: '#666'
+      }}>
+        <div>Pod: {serverInfo.pod}</div>
+        <div>Server: {serverInfo.server}</div>
+        <div>Last Updated: {new Date(serverInfo.timestamp).toLocaleString()}</div>
+      </footer>
     </div>
   );
 }
