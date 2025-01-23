@@ -41,13 +41,13 @@ jobs:
     - name: Build Frontend
       run: |
         cd frontend
-        docker build -t 192.168.22.129:32000/frontend:latest .
+        docker build --platform linux/arm64 -t 192.168.22.129:32000/frontend:latest .
         docker push 192.168.22.129:32000/frontend:latest
     
     - name: Build Backend
       run: |
         cd backend
-        docker build -t 192.168.22.129:32000/backend:latest .
+        docker build --platform linux/arm64 -t 192.168.22.129:32000/backend:latest .
         docker push 192.168.22.129:32000/backend:latest
     
     - name: Create Database Secret
