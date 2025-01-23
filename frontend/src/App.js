@@ -20,15 +20,13 @@ function App() {
 
   const fetchServerInfo = async () => {
     try {
-      // Get frontend info from environment variables passed through k8s
-      const frontendInfo = {
-        pod: process.env.REACT_APP_POD_NAME || 'unknown',
-        server: window.location.hostname
-      };
+      // Get frontend info
+      const frontendResponse = await fetch('/pod-info');
+      const frontendInfo = await frontendResponse.json();
 
       // Get backend info
-      const response = await fetch(`${API_BASE}/info`);
-      const backendInfo = await response.json();
+      const backendResponse = await fetch(`${API_BASE}/info`);
+      const backendInfo = await backendResponse.json();
 
       setServerInfo({
         frontend: frontendInfo,
