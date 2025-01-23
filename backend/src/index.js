@@ -41,7 +41,7 @@ pool.query(`
 });
 
 // Get all books
-app.get('/api/books', async (req, res) => {
+app.get('/books', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM books ORDER BY id DESC');
     res.json(result.rows);
@@ -51,7 +51,7 @@ app.get('/api/books', async (req, res) => {
 });
 
 // Add a new book
-app.post('/api/books', async (req, res) => {
+app.post('/books', async (req, res) => {
   const { title, author, year } = req.body;
   try {
     const result = await pool.query(
@@ -65,7 +65,7 @@ app.post('/api/books', async (req, res) => {
 });
 
 // Update a book
-app.put('/api/books/:id', async (req, res) => {
+app.put('/books/:id', async (req, res) => {
   const { id } = req.params;
   const { title, author, year } = req.body;
   try {
@@ -80,7 +80,7 @@ app.put('/api/books/:id', async (req, res) => {
 });
 
 // Delete a book
-app.delete('/api/books/:id', async (req, res) => {
+app.delete('/books/:id', async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM books WHERE id = $1', [id]);
