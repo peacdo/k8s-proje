@@ -12,7 +12,7 @@ function App() {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch('http://backend-service:8080/api/books');
+      const response = await fetch('/api/books');
       const data = await response.json();
       setBooks(data);
     } catch (error) {
@@ -23,7 +23,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch('http://backend-service:8080/api/books', {
+      await fetch('/api/books', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ function App() {
   };
 
   const deleteBook = async (id) => {
-    await fetch(`http://localhost:8080/api/books/${id}`, {
+    await fetch(`/api/books/${id}`, {
       method: 'DELETE'
     });
     fetchBooks();

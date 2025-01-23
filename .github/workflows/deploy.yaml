@@ -48,6 +48,15 @@ jobs:
     - name: Deploy to Kubernetes
       if: github.ref == 'refs/heads/main'
       run: |
+        # Install NGINX Ingress Controller if not present
+        if ! kubectl get namespace ingress-nginx &> /dev/null; then
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+          kubectl wait --namespace ingress-nginx \
+            --for=condition=ready pod \
+            --selector=app.kubernetes.io/component=controller \
+            --timeout=120s
+        fi
+
         # Create image pull secret first
         kubectl delete secret ghcr-secret --ignore-not-found
         kubectl create secret docker-registry ghcr-secret \
