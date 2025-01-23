@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// Use the backend LoadBalancer IP
-const API_BASE = 'http://192.168.22.241/api';
+// Get the ingress controller's address
+const API_BASE = '/api';  // Use relative path since we're using ingress
 
 function App() {
   const [books, setBooks] = useState([]);

@@ -11,6 +11,59 @@ jobs:
     runs-on: self-hosted
     
     steps:
+    - name: Cleanup Old Resources
+      run: |
+        set +e  # Continue on error
+        
+        echo "Starting cleanup..."
+        
+        # Delete old containers
+        if ! docker ps -aq | xargs -r docker rm -f; then
+          echo "Warning: Failed to remove some containers"
+        fi
+        
+        # Delete old images
+        if ! docker images -q | xargs -r docker rmi -f; then
+          echo "Warning: Failed to remove some images"
+        fi
+        
+        # Delete old volumes
+        if ! docker volume ls -q | xargs -r docker volume rm; then
+          echo "Warning: Failed to remove some volumes"
+        fi
+        
+        # Delete old k8s resources
+        if ! kubectl delete all --all -n proje --ignore-not-found=true; then
+          echo "Warning: Failed to remove some k8s resources"
+        fi
+        
+        if ! kubectl delete ingress --all -n proje --ignore-not-found=true; then
+          echo "Warning: Failed to remove ingress resources"
+        fi
+        
+        if ! kubectl delete secrets --all -n proje --ignore-not-found=true; then
+          echo "Warning: Failed to remove secrets"
+        fi
+        
+        # Clean up disk space
+        if ! docker system prune -af --volumes; then
+          echo "Warning: Failed to clean up some Docker resources"
+        fi
+        
+        echo "Cleanup completed with potential warnings"
+        
+        set -e  # Return to normal error handling
+    
+    - name: Check Disk Space
+      run: |
+        echo "Disk space before cleanup:"
+        df -h
+        
+        # Your cleanup steps here
+        
+        echo "Disk space after cleanup:"
+        df -h
+    
     - uses: actions/checkout@v2
     
     - name: Login to GitHub Container Registry
