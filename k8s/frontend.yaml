@@ -45,6 +45,11 @@ spec:
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 3
+        env:
+        - name: REACT_APP_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
 ---
 apiVersion: v1
 kind: Service

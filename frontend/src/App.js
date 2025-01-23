@@ -8,7 +8,10 @@ function App() {
   const [books, setBooks] = useState([]);
   const [newBook, setNewBook] = useState({ title: '', author: '', year: '' });
   const [editingBook, setEditingBook] = useState(null);
-  const [serverInfo, setServerInfo] = useState({ pod: '', server: '' });
+  const [serverInfo, setServerInfo] = useState({ 
+    frontend: { pod: '', server: '' },
+    backend: { pod: '', server: '' }
+  });
 
   useEffect(() => {
     fetchBooks();
@@ -17,9 +20,20 @@ function App() {
 
   const fetchServerInfo = async () => {
     try {
+      // Get frontend info from environment variables passed through k8s
+      const frontendInfo = {
+        pod: process.env.REACT_APP_POD_NAME || 'unknown',
+        server: window.location.hostname
+      };
+
+      // Get backend info
       const response = await fetch(`${API_BASE}/info`);
-      const data = await response.json();
-      setServerInfo(data);
+      const backendInfo = await response.json();
+
+      setServerInfo({
+        frontend: frontendInfo,
+        backend: backendInfo
+      });
     } catch (error) {
       console.error('Error fetching server info:', error);
     }
@@ -176,9 +190,11 @@ function App() {
         fontSize: '0.9em',
         color: '#666'
       }}>
-        <div>Pod: {serverInfo.pod}</div>
-        <div>Server: {serverInfo.server}</div>
-        <div>Last Updated: {new Date(serverInfo.timestamp).toLocaleString()}</div>
+        <div>Frontend Pod: {serverInfo.frontend.pod}</div>
+        <div>Frontend Server: {serverInfo.frontend.server}</div>
+        <div>Backend Pod: {serverInfo.backend.pod}</div>
+        <div>Backend Server: {serverInfo.backend.server}</div>
+        <div>Last Updated: {new Date().toLocaleString()}</div>
       </footer>
     </div>
   );
