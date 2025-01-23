@@ -11,29 +11,30 @@ function App() {
   }, []);
 
   const fetchBooks = async () => {
-    const response = await fetch('http://localhost:8080/api/books');
-    const data = await response.json();
-    setBooks(data);
+    try {
+      const response = await fetch('http://backend-service:8080/api/books');
+      const data = await response.json();
+      setBooks(data);
+    } catch (error) {
+      console.error('Error fetching books:', error);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingBook) {
-      await fetch(`http://localhost:8080/api/books/${editingBook.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBook)
-      });
-      setEditingBook(null);
-    } else {
-      await fetch('http://localhost:8080/api/books', {
+    try {
+      await fetch('http://backend-service:8080/api/books', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBook)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newBook),
       });
+      setNewBook({ title: '', author: '', year: '' });
+      fetchBooks();
+    } catch (error) {
+      console.error('Error adding book:', error);
     }
-    setNewBook({ title: '', author: '', year: '' });
-    fetchBooks();
   };
 
   const deleteBook = async (id) => {
@@ -50,30 +51,28 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Books Management</h1>
+      <h1>Books Library</h1>
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
         <input
           type="text"
           placeholder="Title"
           value={newBook.title}
-          onChange={(e) => setNewBook({...newBook, title: e.target.value})}
+          onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
         />
         <input
           type="text"
           placeholder="Author"
           value={newBook.author}
-          onChange={(e) => setNewBook({...newBook, author: e.target.value})}
+          onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
         />
         <input
           type="number"
           placeholder="Year"
           value={newBook.year}
-          onChange={(e) => setNewBook({...newBook, year: e.target.value})}
+          onChange={(e) => setNewBook({ ...newBook, year: e.target.value })}
         />
-        <button type="submit">
-          {editingBook ? 'Update Book' : 'Add Book'}
-        </button>
+        <button type="submit">Add Book</button>
       </form>
 
       <table>
