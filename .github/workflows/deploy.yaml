@@ -41,17 +41,15 @@ jobs:
     
     - name: Build Frontend
       run: |
-        NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
         cd frontend
-        docker build -t ${NODE_IP}:32000/frontend:latest .
-        docker push ${NODE_IP}:32000/frontend:latest
+        docker build -t 192.168.22.129:32000/frontend:latest .
+        docker push 192.168.22.129:32000/frontend:latest
     
     - name: Build Backend
       run: |
-        NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
         cd backend
-        docker build -t ${NODE_IP}:32000/backend:latest .
-        docker push ${NODE_IP}:32000/backend:latest
+        docker build -t 192.168.22.129:32000/backend:latest .
+        docker push 192.168.22.129:32000/backend:latest
     
     - name: Create Database Secret
       run: |

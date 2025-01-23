@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: localhost:5000/backend:latest
+        image: 192.168.22.129:32000/backend:latest
         imagePullPolicy: Always
         env:
         - name: DB_PASSWORD
