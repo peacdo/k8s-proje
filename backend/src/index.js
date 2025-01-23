@@ -124,4 +124,27 @@ app.listen(PORT, () => {
 // Add basic health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+// Add memory usage monitoring
+const logMemoryUsage = () => {
+  const used = process.memoryUsage();
+  console.log('Memory usage:');
+  for (let key in used) {
+    console.log(`${key}: ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
+  }
+};
+
+// Log memory usage every 5 minutes
+setInterval(logMemoryUsage, 5 * 60 * 1000);
+
+// Add error handling for uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  logMemoryUsage();
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logMemoryUsage();
 }); 
