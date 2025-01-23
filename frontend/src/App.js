@@ -1,0 +1,106 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+
+function App() {
+  const [books, setBooks] = useState([]);
+  const [newBook, setNewBook] = useState({ title: '', author: '', year: '' });
+  const [editingBook, setEditingBook] = useState(null);
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const fetchBooks = async () => {
+    const response = await fetch('http://localhost:8080/api/books');
+    const data = await response.json();
+    setBooks(data);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (editingBook) {
+      await fetch(`http://localhost:8080/api/books/${editingBook.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBook)
+      });
+      setEditingBook(null);
+    } else {
+      await fetch('http://localhost:8080/api/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBook)
+      });
+    }
+    setNewBook({ title: '', author: '', year: '' });
+    fetchBooks();
+  };
+
+  const deleteBook = async (id) => {
+    await fetch(`http://localhost:8080/api/books/${id}`, {
+      method: 'DELETE'
+    });
+    fetchBooks();
+  };
+
+  const startEdit = (book) => {
+    setEditingBook(book);
+    setNewBook(book);
+  };
+
+  return (
+    <div className="App">
+      <h1>Books Management</h1>
+      
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Title"
+          value={newBook.title}
+          onChange={(e) => setNewBook({...newBook, title: e.target.value})}
+        />
+        <input
+          type="text"
+          placeholder="Author"
+          value={newBook.author}
+          onChange={(e) => setNewBook({...newBook, author: e.target.value})}
+        />
+        <input
+          type="number"
+          placeholder="Year"
+          value={newBook.year}
+          onChange={(e) => setNewBook({...newBook, year: e.target.value})}
+        />
+        <button type="submit">
+          {editingBook ? 'Update Book' : 'Add Book'}
+        </button>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Year</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {books.map(book => (
+            <tr key={book.id}>
+              <td>{book.title}</td>
+              <td>{book.author}</td>
+              <td>{book.year}</td>
+              <td>
+                <button onClick={() => startEdit(book)}>Edit</button>
+                <button onClick={() => deleteBook(book.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default App; 

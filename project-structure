@@ -1,0 +1,14 @@
+.
+├── frontend/
+│   ├── Dockerfile
+│   └── src/
+├── backend/
+│   ├── Dockerfile
+│   └── src/
+├── k8s/
+│   ├── frontend.yaml
+│   ├── backend.yaml
+│   └── database.yaml
+└── .github/
+    └── workflows/
+        └── deploy.yaml 
