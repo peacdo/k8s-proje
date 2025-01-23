@@ -6,9 +6,10 @@ const app = express();
 
 // Update CORS configuration
 app.use(cors({
-  origin: '*',  // In production, you'd want to be more specific
+  origin: true,  // Allow all origins during development
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type', 'Accept'],
+  credentials: true
 }));
 
 app.use(express.json());

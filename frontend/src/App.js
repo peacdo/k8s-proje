@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-const API_BASE = '/api';
+// Use the backend LoadBalancer IP
+const API_BASE = 'http://192.168.22.241/api';
 
 function App() {
   const [books, setBooks] = useState([]);
@@ -14,7 +15,15 @@ function App() {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch(`${API_BASE}/books`);
+      const response = await fetch(`${API_BASE}/books`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setBooks(data);
     } catch (error) {
@@ -25,13 +34,16 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`${API_BASE}/books`, {
+      const response = await fetch(`${API_BASE}/books`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newBook),
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       setNewBook({ title: '', author: '', year: '' });
       fetchBooks();
     } catch (error) {
@@ -41,9 +53,15 @@ function App() {
 
   const deleteBook = async (id) => {
     try {
-      await fetch(`${API_BASE}/books/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API_BASE}/books/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       fetchBooks();
     } catch (error) {
       console.error('Error deleting book:', error);
