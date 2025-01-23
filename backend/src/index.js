@@ -6,6 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+console.log('Starting backend application...');
+
 const pool = new Pool({
   user: 'postgres',
   host: 'postgres-service',
@@ -13,6 +15,8 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: 5432,
 });
+
+console.log('Database configuration loaded...');
 
 // Initialize database
 pool.query(`
@@ -22,7 +26,11 @@ pool.query(`
     author VARCHAR(255) NOT NULL,
     year INTEGER
   )
-`);
+`).then(() => {
+  console.log('Database table created/verified successfully');
+}).catch(err => {
+  console.error('Error initializing database:', err);
+});
 
 // Get all books
 app.get('/api/books', async (req, res) => {
@@ -77,4 +85,9 @@ app.delete('/api/books/:id', async (req, res) => {
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Add basic health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
 }); 

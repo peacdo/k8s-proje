@@ -18,23 +18,47 @@ jobs:
         docker --version
         kubectl version --client
     
+    - name: Setup kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
+    
+    - name: Deploy Registry
+      run: |
+        kubectl apply -f k8s/registry.yaml
+        kubectl wait --for=condition=ready pod -l app=registry --timeout=300s
+    
     - name: Build Frontend
       run: |
         cd frontend
-        docker build -t frontend:latest .
+        docker build -t localhost:5000/frontend:latest .
+        docker push localhost:5000/frontend:latest
     
     - name: Build Backend
       run: |
         cd backend
-        docker build -t backend:latest .
+        docker build -t localhost:5000/backend:latest .
+        docker push localhost:5000/backend:latest
+    
+    - name: Create Database Secret
+      run: |
+        kubectl delete secret db-credentials --ignore-not-found
+        kubectl create secret generic db-credentials --from-literal=password=${{ secrets.DB_PASSWORD }}
     
     - name: Deploy to Kubernetes
-      if: github.ref == 'refs/heads/main'  # Only deploy on main branch
+      if: github.ref == 'refs/heads/main'
       run: |
         kubectl apply -f k8s/database.yaml
         kubectl wait --for=condition=ready pod -l app=postgres --timeout=300s
+        echo "Database pod is ready"
         
         kubectl apply -f k8s/backend.yaml
+        echo "Waiting for backend pod..."
+        sleep 10
+        kubectl get pods -l app=backend -o wide
+        kubectl describe pod -l app=backend
+        kubectl logs -l app=backend
         kubectl wait --for=condition=ready pod -l app=backend --timeout=300s
         
         kubectl apply -f k8s/frontend.yaml
