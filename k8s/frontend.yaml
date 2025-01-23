@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 192.168.22.129:32000/frontend:latest
+        image: ghcr.io/YOUR_USERNAME/frontend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
