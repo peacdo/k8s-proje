@@ -32,14 +32,15 @@ jobs:
         docker build --platform linux/arm64 -t ghcr.io/peacdo/backend:latest .
         docker push ghcr.io/peacdo/backend:latest
     
-    - name: Create Database Secret
+    - name: Setup Namespace and Secrets
       run: |
+        # Create namespace
         kubectl create namespace proje --dry-run=client -o yaml | kubectl apply -f -
+        
+        # Create secrets
         kubectl delete secret db-credentials --ignore-not-found -n proje
         kubectl create secret generic db-credentials --from-literal=password=${{ secrets.DB_PASSWORD }} -n proje
-    
-    - name: Create Image Pull Secret
-      run: |
+        
         kubectl delete secret ghcr-secret --ignore-not-found -n proje
         kubectl create secret docker-registry ghcr-secret \
           --docker-server=ghcr.io \
@@ -47,16 +48,25 @@ jobs:
           --docker-password=${{ secrets.CR_PAT }} \
           -n proje
     
+    - name: Install NGINX Ingress Controller
+      run: |
+        if ! kubectl get namespace ingress-nginx &> /dev/null; then
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+          kubectl wait --namespace ingress-nginx \
+            --for=condition=ready pod \
+            --selector=app.kubernetes.io/component=controller \
+            --timeout=120s
+        fi
+    
     - name: Deploy to Kubernetes
       if: github.ref == 'refs/heads/main'
       run: |
-        # Create namespace if it doesn't exist
-        kubectl create namespace proje --dry-run=client -o yaml | kubectl apply -f -
-        
+        # Deploy database
         kubectl apply -f k8s/database.yaml
         kubectl wait --for=condition=ready pod -l app=postgres --timeout=300s -n proje
         echo "Database pod is ready"
         
+        # Deploy backend
         kubectl apply -f k8s/backend.yaml
         echo "Waiting for backend pod..."
         sleep 10
@@ -65,42 +75,16 @@ jobs:
         kubectl logs -l app=backend -n proje
         kubectl wait --for=condition=ready pod -l app=backend --timeout=300s -n proje
         
+        # Deploy frontend
         kubectl apply -f k8s/frontend.yaml
         kubectl wait --for=condition=ready pod -l app=frontend --timeout=300s -n proje
     
     - name: Verify Deployment
       if: github.ref == 'refs/heads/main'
       run: |
+        echo "Pods:"
         kubectl get pods -n proje
+        echo "\nServices:"
         kubectl get services -n proje
-
-        # Install NGINX Ingress Controller if not present
-        if ! kubectl get namespace ingress-nginx &> /dev/null; then
-          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
-          kubectl wait --namespace ingress-nginx \
-            --for=condition=ready pod \
-            --selector=app.kubernetes.io/component=controller \
-            --timeout=120s
-        fi
-
-        # Create image pull secret first
-        kubectl delete secret ghcr-secret --ignore-not-found
-        kubectl create secret docker-registry ghcr-secret \
-          --docker-server=ghcr.io \
-          --docker-username=peacdo \
-          --docker-password=${{ secrets.CR_PAT }}
-        
-        kubectl apply -f k8s/database.yaml
-        kubectl wait --for=condition=ready pod -l app=postgres --timeout=300s
-        echo "Database pod is ready"
-        
-        kubectl apply -f k8s/backend.yaml
-        echo "Waiting for backend pod..."
-        sleep 10
-        kubectl get pods -l app=backend -o wide
-        kubectl describe pod -l app=backend
-        kubectl logs -l app=backend
-        kubectl wait --for=condition=ready pod -l app=backend --timeout=300s
-        
-        kubectl apply -f k8s/frontend.yaml
-        kubectl wait --for=condition=ready pod -l app=frontend --timeout=300s 
+        echo "\nIngress:"
+        kubectl get ingress -n proje 
