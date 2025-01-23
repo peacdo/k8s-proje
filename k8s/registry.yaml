@@ -33,8 +33,9 @@ spec:
           mountPath: /var/lib/registry
       volumes:
       - name: registry-storage
-        persistentVolumeClaim:
-          claimName: registry-pvc
+        hostPath:
+          path: /var/lib/registry
+          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
